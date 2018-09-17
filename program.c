@@ -1,7 +1,9 @@
-#include "Models/control.c"
 #include <stdio.h>
+#include "Models/Control.c"
+#include "Models/Stack.c"
 
 struct Control ctrl;
+struct Stack* stack;
 
 int main(int argc, char const *argv[])
 {
@@ -12,6 +14,9 @@ int main(int argc, char const *argv[])
     }
 
     ctrl = getControl(argv);
+    stack = createStack(5);
+
+    
 
     return 0;
 }
