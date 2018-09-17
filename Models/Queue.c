@@ -8,6 +8,7 @@
 
 typedef struct {
     pthread_t info;
+    int time;
 } DATA;
 
 typedef struct Node_t {
