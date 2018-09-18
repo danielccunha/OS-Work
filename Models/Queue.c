@@ -3,8 +3,8 @@
 #include <stdio.h>
 #include <pthread.h>
 
-#define TRUE  1
-#define FALSE	0
+#define TRUE    1
+#define FALSE   0
 
 typedef struct {
     pthread_t info;
@@ -27,7 +27,7 @@ Queue *ConstructQueue(int limit);
 void DestructQueue(Queue *queue);
 int Enqueue(Queue *pQueue, NODE *item);
 NODE *Dequeue(Queue *pQueue);
-int isEmpty(Queue* pQueue);
+int isQueueEmpty(Queue* pQueue);
 
 Queue *ConstructQueue(int limit) {
     Queue *queue = (Queue*) malloc(sizeof (Queue));
@@ -47,7 +47,7 @@ Queue *ConstructQueue(int limit) {
 
 void DestructQueue(Queue *queue) {
     NODE *pN;
-    while (!isEmpty(queue)) {
+    while (!isQueueEmpty(queue)) {
         pN = Dequeue(queue);
         free(pN);
     }
@@ -81,7 +81,7 @@ int Enqueue(Queue *pQueue, NODE *item) {
 NODE * Dequeue(Queue *pQueue) {
     /*the queue is empty or bad param*/
     NODE *item;
-    if (isEmpty(pQueue))
+    if (isQueueEmpty(pQueue))
         return NULL;
     item = pQueue->head;
     pQueue->head = (pQueue->head)->prev;
@@ -89,7 +89,7 @@ NODE * Dequeue(Queue *pQueue) {
     return item;
 }
 
-int isEmpty(Queue* pQueue) {
+int isQueueEmpty(Queue* pQueue) {
     if (pQueue == NULL) {
         return FALSE;
     }
@@ -100,7 +100,7 @@ int isEmpty(Queue* pQueue) {
     }
 }
 
-int isFull(Queue* pQueue) {
+int isQueueFull(Queue* pQueue) {
     if (pQueue == NULL) {
         return FALSE;
     }

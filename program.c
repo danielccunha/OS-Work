@@ -7,8 +7,8 @@
 #include "Models/Algorithms.c"
 
 #define SLEEPTIME 1
-
-#define NFIFO 1
+#define FIFO 1
+#define SJF 2
 
 struct Control ctrl;
 Queue* queue;
@@ -61,7 +61,7 @@ void *threadGenerator(void *args)
 
     for(int i = 0; i < ctrl.N; ++i)
     {
-        while (isFull(queue))        
+        while (isQueueFull(queue))        
             sleep(SLEEPTIME);
 
         NODE *pN = (NODE*) malloc(sizeof (NODE));
@@ -74,6 +74,8 @@ void *threadGenerator(void *args)
     }
 }
 
+NODE *getFromQueue();
+
 void *threadScheduler(void *args)
 {
     int count = 0, total = 0;
@@ -81,17 +83,18 @@ void *threadScheduler(void *args)
 
     while (count < N)
     {
-        while (isEmpty(queue))
+        while (isQueueEmpty(queue))
             sleep(SLEEPTIME);
 
-        sem_wait(&semQueue);
-        NODE *pN = Dequeue(queue);
-        sem_post(&semQueue);
+        NODE *pN;        
 
         switch (ctrl.A)
         {
-            case 1:
-                FIFO_naoPreemptivo(pN);
+            case FIFO:
+                pN = getFromQueue();
+                FIFO_nonPreemptive(pN);
+                break;
+            case SJF:
                 break;
         }
 
@@ -101,4 +104,13 @@ void *threadScheduler(void *args)
 
     printf("\nFinished scheduler\n");
     printf("Total time: %d\n", total);
+}
+
+NODE *getFromQueue()
+{
+    sem_wait(&semQueue);
+    NODE *pN = Dequeue(queue);
+    sem_post(&semQueue);
+
+    return pN;
 }
