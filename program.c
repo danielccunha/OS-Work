@@ -12,12 +12,16 @@
 
 struct Control ctrl;
 Queue* queue;
-sem_t semQueue;
+List* list;
+sem_t semStruct;
+int isQueueAlgorithm = 1;
 
 void *threadCPU(void *argv);
 void *threadGenerator(void *args);
 void *threadScheduler(void *args);
 void *createThread(void *args);
+NODE *getFromQueue();
+NODE *getFromList();
 
 int main(int argc, char const *argv[])
 {
@@ -39,9 +43,13 @@ int main(int argc, char const *argv[])
 void *threadCPU(void *args) 
 {
     ctrl = getControl(args);
-    queue = ConstructQueue(ctrl.T);
+    // TODO Add missing cases
+    isQueueAlgorithm = ctrl.A == 1;
 
-    sem_init(&semQueue, 0, 1);
+    queue = ConstructQueue(ctrl.T);
+    list = ConstructList(ctrl.T);
+
+    sem_init(&semStruct, 0, 1);
 
     pthread_t tidGenerator, tidScheduler;
     pthread_create(&tidGenerator, NULL, threadGenerator, NULL);
@@ -61,20 +69,27 @@ void *threadGenerator(void *args)
 
     for(int i = 0; i < ctrl.N; ++i)
     {
-        while (isQueueFull(queue))        
+        while ((isQueueAlgorithm && isQueueFull(queue)) || (!isQueueAlgorithm && isListFull(list)))
             sleep(SLEEPTIME);
 
         NODE *pN = (NODE*) malloc(sizeof (NODE));
         pN->data.info = tid[i];
         pN->data.time = ctrl.Min + (rand() % ctrl.Max);
+        pN->key = i;
+
+        sem_wait(&semStruct);
         
-        sem_wait(&semQueue);
-        Enqueue(queue, pN);
-        sem_post(&semQueue);
+        if (isQueueAlgorithm)
+            Enqueue(queue, pN);
+        else
+        {
+            insertNode(list, pN);
+            sortList(list);
+        }
+        
+        sem_post(&semStruct);
     }
 }
-
-NODE *getFromQueue();
 
 void *threadScheduler(void *args)
 {
@@ -83,7 +98,7 @@ void *threadScheduler(void *args)
 
     while (count < N)
     {
-        while (isQueueEmpty(queue))
+        while ((isQueueAlgorithm && isQueueEmpty(queue)) || (!isQueueAlgorithm && isListEmpty(list)))
             sleep(SLEEPTIME);
 
         NODE *pN;        
@@ -92,9 +107,11 @@ void *threadScheduler(void *args)
         {
             case FIFO:
                 pN = getFromQueue();
-                FIFO_nonPreemptive(pN);
+                runThread(pN);
                 break;
             case SJF:
+                pN = getFromList();
+                runThread(pN);
                 break;
         }
 
@@ -108,9 +125,18 @@ void *threadScheduler(void *args)
 
 NODE *getFromQueue()
 {
-    sem_wait(&semQueue);
+    sem_wait(&semStruct);
     NODE *pN = Dequeue(queue);
-    sem_post(&semQueue);
+    sem_post(&semStruct);
+
+    return pN;
+}
+
+NODE *getFromList()
+{
+    sem_wait(&semStruct);
+    NODE *pN = getFirstNode(list);
+    sem_post(&semStruct);
 
     return pN;
 }

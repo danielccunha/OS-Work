@@ -1,25 +1,26 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <pthread.h>
 
 #define TRUE    1
 #define FALSE   0
 
 typedef struct {
-    // pthread_t info;
+    pthread_t info;
     int time;
     int priority;
-} VALUE;
+} DATA;
 
-typedef struct ITEM_t {
-   VALUE data;
+typedef struct Node_t {
+   DATA data;
    int key;
-   struct ITEM_t *next;
-} ITEM;
+   struct Node_t *next;
+} NODE;
 
 typedef struct List {
-    ITEM *head;
-    ITEM *tail;
+    NODE *head;
+    NODE *tail;
     int size;
     int limit;
 } List;
@@ -27,9 +28,9 @@ typedef struct List {
 List *ConstructList(int limit);
 int isListEmpty(List* list);
 int isListFull(List* list);
-int insertITEM(List *list, ITEM *item);
-ITEM* getFirstITEM(List *list);
-ITEM* getITEMByKey(List *list, int key);
+int insertNode(List *list, NODE *item);
+NODE* getFirstNode(List *list);
+NODE* getNodeByKey(List *list, int key);
 void printList(List *list);
 void sortList(List *list);
 
@@ -67,7 +68,7 @@ int isListFull(List* list)
     return (list->size == list->limit) ? TRUE : FALSE;
 }
 
-int insertITEM(List *list, ITEM *item)
+int insertNode(List *list, NODE *item)
 {
     if (list == NULL || item == NULL)
         return FALSE;
@@ -88,16 +89,17 @@ int insertITEM(List *list, ITEM *item)
     return TRUE;
 }
 
-ITEM* getFirstITEM(List *list) 
+NODE* getFirstNode(List *list) 
 {
-   ITEM *tmp = list->head;
+   NODE *tmp = list->head;
 	
    list->head = list->head->next;
+   list->size--;
 	
    return tmp;
 }
 
-ITEM* getITEMByKey(List *list, int key) 
+NODE* getNodeByKey(List *list, int key) 
 {
     if (list == NULL)
         return NULL;
@@ -105,8 +107,8 @@ ITEM* getITEMByKey(List *list, int key)
     if (isListEmpty(list))
         return NULL;
 
-    ITEM* current = list->head;
-    ITEM* next = NULL;
+    NODE* current = list->head;
+    NODE* next = NULL;
 
     while(current->key != key) {
         if(current->next == NULL)
@@ -129,7 +131,7 @@ ITEM* getITEMByKey(List *list, int key)
 
 void printList(List *list)
 {
-   ITEM *ptr = list->head;
+   NODE *ptr = list->head;
    printf("[ ");
 	
    while(ptr != NULL) {
@@ -143,8 +145,8 @@ void printList(List *list)
 void sortList(List *list) 
 {
     int i, j, k, tempKey, tempData;
-    ITEM *current;
-    ITEM *next;
+    NODE *current;
+    NODE *next;
 
     int size = list->size;
     k = size;

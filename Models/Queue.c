@@ -2,19 +2,10 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <pthread.h>
+#include "List.c"
 
 #define TRUE    1
 #define FALSE   0
-
-typedef struct {
-    pthread_t info;
-    int time;
-} DATA;
-
-typedef struct Node_t {
-    DATA data;
-    struct Node_t *prev;
-} NODE;
 
 typedef struct Queue {
     NODE *head;
@@ -64,14 +55,14 @@ int Enqueue(Queue *pQueue, NODE *item) {
         return FALSE;
     }
     /*the queue is empty*/
-    item->prev = NULL;
+    item->next = NULL;
     if (pQueue->size == 0) {
         pQueue->head = item;
         pQueue->tail = item;
 
     } else {
         /*adding item to the end of the queue*/
-        pQueue->tail->prev = item;
+        pQueue->tail->next = item;
         pQueue->tail = item;
     }
     pQueue->size++;
@@ -84,7 +75,7 @@ NODE * Dequeue(Queue *pQueue) {
     if (isQueueEmpty(pQueue))
         return NULL;
     item = pQueue->head;
-    pQueue->head = (pQueue->head)->prev;
+    pQueue->head = (pQueue->head)->next;
     pQueue->size--;
     return item;
 }
