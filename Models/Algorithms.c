@@ -1,18 +1,28 @@
 #include <pthread.h>
 #include "Queue.c"
 
+struct Data 
+{
+    int time;
+    int priority;
+};
+
 void *createThread(void *args);
 
 void runThread(NODE *pN)
 {
-    pthread_create(&pN->data.info, NULL, createThread, &pN->data.time);
+    struct Data data;
+    data.time = pN->data.time;
+    data.priority = pN->data.priority;
+
+    pthread_create(&pN->data.info, NULL, createThread, &data);
     pthread_join(pN->data.info, NULL);
 }
 
 void *createThread(void *args)
 {
-    int time = *((int *) args);
+    struct Data data = *((struct Data *) args);
 
-    printf("Sleeping %d seconds...\n", time);
-    sleep(time);
+    printf("Priority: %d. Sleeping %d seconds...\n", data.priority, data.time);
+    sleep(data.time);
 }

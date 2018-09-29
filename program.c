@@ -9,6 +9,7 @@
 #define SLEEPTIME 1
 #define FIFO 1
 #define SJF 2
+#define NPriority 3
 
 struct Control ctrl;
 Queue* queue;
@@ -75,6 +76,7 @@ void *threadGenerator(void *args)
         NODE *pN = (NODE*) malloc(sizeof (NODE));
         pN->data.info = tid[i];
         pN->data.time = ctrl.Min + (rand() % ctrl.Max);
+        pN->data.priority = ctrl.Pi + (rand() % ctrl.Pf);
         pN->key = i;
 
         sem_wait(&semStruct);
@@ -84,7 +86,7 @@ void *threadGenerator(void *args)
         else
         {
             insertNode(list, pN);
-            sortList(list);
+            sortList(list, ctrl.A);
         }
         
         sem_post(&semStruct);
@@ -109,7 +111,8 @@ void *threadScheduler(void *args)
                 pN = getFromQueue();
                 runThread(pN);
                 break;
-            case SJF:
+            
+            case SJF: case NPriority:
                 pN = getFromList();
                 runThread(pN);
                 break;

@@ -32,7 +32,7 @@ int insertNode(List *list, NODE *item);
 NODE* getFirstNode(List *list);
 NODE* getNodeByKey(List *list, int key);
 void printList(List *list);
-void sortList(List *list);
+void sortList(List *list, int algorithm);
 
 List *ConstructList(int limit) 
 {
@@ -142,9 +142,9 @@ void printList(List *list)
    printf("]\n");
 }
 
-void sortList(List *list) 
+void sortList(List *list, int algorithm) 
 {
-    int i, j, k, tempKey, tempData;
+    int i, j, k, tempKey, tempTime, tempPriority;
     NODE *current;
     NODE *next;
 
@@ -158,10 +158,16 @@ void sortList(List *list)
 
         for (j = 1; j < k; j++) 
         {   
-            if (current->data.time > next->data.time ) {
-                tempData = current->data.time;
+            if ((algorithm == 2 && current->data.time > next->data.time) || (algorithm == 3 && current->data.priority > next->data.priority))
+            {
+                tempTime = current->data.time;
+                tempPriority = current->data.priority;
+
                 current->data.time = next->data.time;
-                next->data.time = tempData;
+                current->data.priority = next->data.priority;
+                
+                next->data.time = tempTime;
+                next->data.priority = tempPriority;
 
                 tempKey = current->key;
                 current->key = next->key;
