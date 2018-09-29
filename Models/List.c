@@ -10,6 +10,7 @@ typedef struct {
     pthread_t info;
     int time;
     int priority;
+    int initialTime;
 } DATA;
 
 typedef struct Node_t {
@@ -97,6 +98,40 @@ NODE* getFirstNode(List *list)
    list->size--;
 	
    return tmp;
+}
+
+NODE* getForHRRN(List *list, int initialTime) 
+{
+    NODE *pN = getFirstNode(list);
+    NODE *ptr = list->head;
+
+    if (pN->data.time == 0)
+        pN->data.time = 0.000001;
+
+    double t = pN->data.time;
+    if (t == 0)
+        t = 0.0000001;
+
+    double currTime = 1 + (pN->data.initialTime - initialTime)/t;
+    double tmp;
+
+    while(ptr != NULL) 
+    {
+        t = ptr->data.time;
+        if (t == 0)
+            t = 0.0000001;
+
+        tmp = 1 + (ptr->data.initialTime - initialTime)/t;
+        if (tmp > currTime)
+        {
+            currTime = tmp;
+            pN = ptr;
+        }
+
+        ptr = ptr->next;
+    }
+
+    return pN;
 }
 
 NODE* getNodeByKey(List *list, int key) 
