@@ -193,7 +193,7 @@ void sortList(List *list, int algorithm)
 
         for (j = 1; j < k; j++) 
         {   
-            if ((algorithm == 2 && current->data.time > next->data.time) || (algorithm == 3 && current->data.priority > next->data.priority))
+            if ((algorithm == 2 && current->data.time > next->data.time) || ((algorithm == 3 || algorithm == 7) && current->data.priority > next->data.priority))
             {
                 tempTime = current->data.time;
                 tempPriority = current->data.priority;

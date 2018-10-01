@@ -13,6 +13,8 @@
 #define HRRN 4
 #define RoundRobin 5
 
+#define PriorityRR 7
+
 struct Control ctrl;
 Queue* queue;
 List* list;
@@ -116,7 +118,8 @@ void *threadScheduler(void *args)
         while ((isQueueAlgorithm && isQueueEmpty(queue)) || (!isQueueAlgorithm && isListEmpty(list)))
             sleep(SLEEPTIME);
 
-        NODE *pN;        
+        NODE *pN;
+        int timeToSleep = 0;
 
         switch (ctrl.A)
         {
@@ -137,31 +140,58 @@ void *threadScheduler(void *args)
 
             case RoundRobin:
                 pN = getFromQueue();
+
+                if (pN->data.time != 0)
+                {
+                    pN->data.time -= ctrl.Q;
+
+                    timeToSleep = ctrl.Q;
+
+                    if (pN->data.time < 0)
+                    {
+                        int value = pN->data.time + ctrl.Q;
+                        timeToSleep = (value > 0) ? value : ctrl.Q;
+                    }
+                    else if (pN->data.time > 0)
+                    {
+                        sem_wait(&semStruct);
+                        Enqueue(queue, pN);
+                        count--;
+                        sem_post(&semStruct);
+                    }                
+                }
+                else
+                    timeToSleep = 0;
+
+                total += timeToSleep;
+                runThreadRR(pN, timeToSleep);
+                break;
+            
+            case PriorityRR:
+                pN = getFromList();
                 pN->data.time -= ctrl.Q;
 
-                int timeToSleep = ctrl.Q;
+                timeToSleep = ctrl.Q;
 
                 if (pN->data.time < 0)
                 {
                     int value = pN->data.time + ctrl.Q;
                     timeToSleep = (value > 0) ? value : ctrl.Q;
                 }
-                else if (pN->data.time > 0)
+                else
                 {
                     sem_wait(&semStruct);
-                    Enqueue(queue, pN);
-                    count--;
+                    insertNode(list, pN);
+                    sortList(list, ctrl.A);
                     sem_post(&semStruct);
-                }                
+                }
 
                 runThreadRR(pN, timeToSleep);
                 break;
         }
 
-        if (ctrl.A != RoundRobin)        
+        if (ctrl.A != RoundRobin && ctrl.A != PriorityRR)        
             total += pN->data.time;
-        else
-            total += (pN->data.time >= 0) ? pN->data.time : pN->data.time + ctrl.Q;
         
         count++;
     }    
