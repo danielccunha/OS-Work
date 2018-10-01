@@ -142,8 +142,11 @@ void *threadScheduler(void *args)
                 int timeToSleep = ctrl.Q;
 
                 if (pN->data.time < 0)
-                    timeToSleep = pN->data.time + ctrl.Q;
-                else
+                {
+                    int value = pN->data.time + ctrl.Q;
+                    timeToSleep = (value > 0) ? value : ctrl.Q;
+                }
+                else if (pN->data.time > 0)
                 {
                     sem_wait(&semStruct);
                     Enqueue(queue, pN);
