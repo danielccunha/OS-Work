@@ -11,6 +11,7 @@
 #define SJF 2
 #define NPriority 3
 #define HRRN 4
+#define RoundRobin 5
 
 struct Control ctrl;
 Queue* queue;
@@ -51,8 +52,7 @@ void *threadCPU(void *args)
     struct tm *tm = localtime(&now);
     initialTime = tm->tm_hour * 3600 + tm->tm_min * 60 + tm->tm_sec;
 
-    // TODO Add missing cases
-    isQueueAlgorithm = ctrl.A == 1;
+    isQueueAlgorithm = ctrl.A == FIFO || ctrl.A == RoundRobin;
 
     queue = ConstructQueue(ctrl.T);
     list = ConstructList(ctrl.T);
@@ -129,13 +129,37 @@ void *threadScheduler(void *args)
                 pN = getFromList();
                 runThread(pN);
                 break;
+            
             case HRRN:
                 pN = getNodeForHRRN();
                 runThread(pN);
                 break;
+
+            case RoundRobin:
+                pN = getFromQueue();
+                pN->data.time -= ctrl.Q;
+
+                int timeToSleep = ctrl.Q;
+
+                if (pN->data.time < 0)
+                    timeToSleep = pN->data.time + ctrl.Q;
+                else
+                {
+                    sem_wait(&semStruct);
+                    Enqueue(queue, pN);
+                    count--;
+                    sem_post(&semStruct);
+                }                
+
+                runThreadRR(pN, timeToSleep);
+                break;
         }
 
-        total += pN->data.time;
+        if (ctrl.A != RoundRobin)        
+            total += pN->data.time;
+        else
+            total += (pN->data.time >= 0) ? pN->data.time : pN->data.time + ctrl.Q;
+        
         count++;
     }    
 

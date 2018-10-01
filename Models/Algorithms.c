@@ -21,6 +21,17 @@ void runThread(NODE *pN)
     pthread_join(pN->data.info, NULL);
 }
 
+void runThreadRR(NODE *pN, int timeToSleep) 
+{
+    struct Data data;
+    data.time = timeToSleep;
+    data.priority = pN->data.priority;
+    data.initialTime = pN->data.initialTime;
+
+    pthread_create(&pN->data.info, NULL, createThread, &data);
+    pthread_join(pN->data.info, NULL);
+}
+
 void *createThread(void *args)
 {
     struct Data data = *((struct Data *) args);
