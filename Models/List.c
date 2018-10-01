@@ -29,7 +29,7 @@ typedef struct List {
 List *ConstructList(int limit);
 int isListEmpty(List* list);
 int isListFull(List* list);
-int insertNode(List *list, NODE *item);
+int insertNode(List *list, NODE *item, int algorithm);
 NODE* getFirstNode(List *list);
 NODE* getNodeByKey(List *list, int key);
 void printList(List *list);
@@ -69,7 +69,7 @@ int isListFull(List* list)
     return (list->size == list->limit) ? TRUE : FALSE;
 }
 
-int insertNode(List *list, NODE *item)
+int insertNode(List *list, NODE *item, int algorithm)
 {
     if (list == NULL || item == NULL)
         return FALSE;
@@ -87,6 +87,7 @@ int insertNode(List *list, NODE *item)
 
     list->size++;
     
+    sortList(list, algorithm);
     return TRUE;
 }
 
@@ -193,7 +194,8 @@ void sortList(List *list, int algorithm)
 
         for (j = 1; j < k; j++) 
         {   
-            if ((algorithm == 2 && current->data.time > next->data.time) || ((algorithm == 3 || algorithm == 7) && current->data.priority > next->data.priority))
+            if ((algorithm == 2 && current->data.time > next->data.time) || (algorithm == 3 && current->data.priority > next->data.priority) ||
+                (algorithm == 7 && current->data.priority > next->data.priority))
             {
                 tempTime = current->data.time;
                 tempPriority = current->data.priority;

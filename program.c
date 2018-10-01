@@ -99,10 +99,7 @@ void *threadGenerator(void *args)
         if (isQueueAlgorithm)
             Enqueue(queue, pN);
         else
-        {
-            insertNode(list, pN);
-            sortList(list, ctrl.A);
-        }
+            insertNode(list, pN, ctrl.A);        
         
         sem_post(&semStruct);
     }
@@ -144,7 +141,6 @@ void *threadScheduler(void *args)
                 if (pN->data.time != 0)
                 {
                     pN->data.time -= ctrl.Q;
-
                     timeToSleep = ctrl.Q;
 
                     if (pN->data.time < 0)
@@ -169,23 +165,29 @@ void *threadScheduler(void *args)
             
             case PriorityRR:
                 pN = getFromList();
-                pN->data.time -= ctrl.Q;
 
-                timeToSleep = ctrl.Q;
-
-                if (pN->data.time < 0)
+                if (pN->data.time > 0)
                 {
-                    int value = pN->data.time + ctrl.Q;
-                    timeToSleep = (value > 0) ? value : ctrl.Q;
+                    pN->data.time -= ctrl.Q;
+                    timeToSleep = ctrl.Q;
+
+                    if (pN->data.time < 0)
+                    {
+                        int value = pN->data.time + ctrl.Q;
+                        timeToSleep = (value > 0) ? value : ctrl.Q;
+                    }
+                    else
+                    {
+                        sem_wait(&semStruct);
+                        insertNode(list, pN, ctrl.A);
+                        count--;
+                        sem_post(&semStruct);
+                    }
                 }
                 else
-                {
-                    sem_wait(&semStruct);
-                    insertNode(list, pN);
-                    sortList(list, ctrl.A);
-                    sem_post(&semStruct);
-                }
+                    timeToSleep = 0;
 
+                total += timeToSleep;
                 runThreadRR(pN, timeToSleep);
                 break;
         }
