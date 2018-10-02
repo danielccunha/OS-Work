@@ -28,6 +28,7 @@ void *createThread(void *args);
 NODE *getFromQueue();
 NODE *getFromList();
 NODE *getNodeForHRRN();
+int isImplemented(int algo);
 
 int main(int argc, char const *argv[])
 {
@@ -49,6 +50,12 @@ int main(int argc, char const *argv[])
 void *threadCPU(void *args) 
 {
     ctrl = getControl(args);
+
+    if (!isImplemented(ctrl.A))
+    {
+        printf("Algorithm not implemented.\n");
+        return NULL;
+    }
 
     time_t now = time(0);
     struct tm *tm = localtime(&now);
@@ -227,4 +234,10 @@ NODE *getNodeForHRRN()
     sem_post(&semStruct);
 
     return pN;
+}
+
+int isImplemented(int algo) 
+{
+    return algo == FIFO || algo == SJF || algo == NPriority || algo == PriorityRR || algo == HRRN ||
+           algo == RoundRobin;
 }
