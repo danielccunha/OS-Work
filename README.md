@@ -1,5 +1,5 @@
 # OS Work
-Work of Operating Systems, where we've got to implement **scheduling algorithms** working with semaphores and threads, using pthread.h and semaphore.h in C.
+Work of Operating Systems, where I had to implement **scheduling algorithms** working with semaphores and threads, using pthread.h and semaphore.h in C.
 
 ## Scheduling Algorithms
 - Non-preemptive
@@ -66,7 +66,7 @@ Finished scheduler
 Total time: 21
 ```
 
-In this case, we've runned a non-preemptive Priority algorithm, with minimum priority 1 and maximum priority 5. The values generated for priorities and time are totally random, so the result will probably be different in your machine.
+In this case, I've run a non-preemptive Priority algorithm, with minimum priority 1 and maximum priority 5. The values generated for priorities and time are totally random, so the result probably will be different on your machine.
 
 ## License
 MIT License
