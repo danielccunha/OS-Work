@@ -21,6 +21,16 @@ cd OS-Work
 gcc program.c -lpthread
 ```
 
+## Algorithms
+1. FCFS/FIFO
+2. SJF/SJN
+3. Non-preemptive Priority
+4. HRRN
+5. Round-robin
+6. Priority FIFO/FCFS (not implemented)
+7. Priority with RR
+8. SRT (not implemented)
+
 ## How to use
 After compiling the project, in order to execute `program.c` you must pass eight arguments:
 - N: numbers of processes
